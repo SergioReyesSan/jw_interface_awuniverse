@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>jw_interface_serial</name>
+  <version>0.0.0</version>
+  <description>The jw_interface_serial package</description>
+  <license>Apache 2</license>
+
+  <maintainer email="yamato.ando@gmail.com">YamatoAndo</maintainer>
+  <author email="yamato.ando@gmail.com">YamatoAndo</author>
+  <author email="azumi-suzuki@todo.todo">azumi-suzuki</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
+  <depend>jw_interface_msgs</depend>
+
+  <export>
+  </export>
+
+</package>

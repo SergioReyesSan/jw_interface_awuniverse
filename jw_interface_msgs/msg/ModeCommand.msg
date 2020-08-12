@@ -1,0 +1,5 @@
+uint8 MANUAL=0
+uint8 JS_AD_CONTROL=1
+uint8 MOTOR_RPM_CONTROL=2
+
+uint8 mode

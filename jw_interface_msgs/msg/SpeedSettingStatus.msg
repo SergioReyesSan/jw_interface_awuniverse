@@ -1,0 +1,7 @@
+uint8 FIRST_SPEED=1
+uint8 SECOND_SPEED=2
+uint8 THIRD_SPEED=3
+uint8 FOURTH_SPEED=4
+uint8 FIFTH_SPEED=5
+
+uint8 speed_setting
