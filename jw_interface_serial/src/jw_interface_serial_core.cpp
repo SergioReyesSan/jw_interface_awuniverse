@@ -6,17 +6,11 @@ JwInterfaceSerial::JwInterfaceSerial(const ros::NodeHandle &nh, const ros::NodeH
     , mode_cmd(serial_cmd_academic_mode)
     , speed_cmd(serial_cmd_stop)
     , serial_port_("/dev/ttyUSB0")
-    , tire_circumference_(1.18)
-    , gear_ratio_(12.64)
-    , tread_(0.625)  //proto 0.s52
     , control_mode(ControlMode::ManualJwStick)
 {
 
   // rosparam
   private_nh_.param<std::string>("serial_port", serial_port_, serial_port_);
-  private_nh_.param<double>("tire_circumference", tire_circumference_, tire_circumference_);//[m]
-  private_nh_.param<double>("gear_ratio", gear_ratio_, gear_ratio_);//[-]
-  private_nh_.param<double>("tread", tread_, tread_);//[m]
   private_nh_.param<double>("vehicle_cmd_timeout", vehicle_cmd_timeout_, 0.2);//[sec]
 
   // Subscriber
@@ -304,74 +298,3 @@ std::array<u_char, 2> JwInterfaceSerial::toHexString(const int val)
 
   return hex_char;
 }
-
-
-// void JwInterfaceSerial::convertRpmToSpeed(const int right_motor_rpm, const int left_motor_rpm, double* const trans_vel, double* const angular_vel)
-// {
-//   geometry_msgs::TwistStamped out_twist;
-//
-//   const double right_velocity = right_motor_rpm / 60.0  * tire_circumference_ / gear_ratio_;
-//   const double left_velocity = left_motor_rpm / 60.0  * tire_circumference_ / gear_ratio_;
-//   *trans_vel = (right_velocity + left_velocity) / 2.0;
-//   *angular_vel = (right_velocity - left_velocity) / tread_;
-//
-//   std::cout << "v:" << *trans_vel << " w:" << *angular_vel << std::endl;
-// }
-//
-//
-// void JwInterfaceSerial::convertSpeedToStickRatio(const double trans_vel, const double angular_vel, int* const trans_ratio, int* const angular_ratio)
-// {
-//   if(trans_vel >= 0) {
-//     const double trans_min_ratio = 3.0;
-//     const double trans_max_ratio = 100.0;
-//     const double trans_min_rpm = 20.0;
-//     const double trans_max_rpm = 1680.0;
-//     const double trans_min_vel = trans_min_rpm / 60.0 * tire_circumference_ / gear_ratio_ / 2.0;
-//     const double trans_max_vel = trans_max_rpm / 60.0 * tire_circumference_ / gear_ratio_ / 2.0;
-//     *trans_ratio = (trans_vel > trans_min_vel)
-//                    ? ((trans_vel-trans_min_vel)/(trans_max_vel-trans_min_vel)*(trans_max_ratio-trans_min_ratio) + trans_min_ratio)
-//                    : 0;
-//   }
-//   else {
-//     const double trans_negative_min_ratio = 5.0;
-//     const double trans_negative_max_ratio = 100.0;
-//     const double trans_negative_min_rpm = 15.0;
-//     const double trans_negative_max_rpm = 815.0;
-//     const double trans_negative_min_vel = trans_negative_min_rpm / 60.0 * tire_circumference_ / gear_ratio_ / 2.0;
-//     const double trans_negative_max_vel = trans_negative_max_rpm / 60.0 * tire_circumference_ / gear_ratio_ / 2.0;
-//     *trans_ratio = (std::fabs(trans_vel) > trans_negative_min_vel)
-//                    ? ((std::fabs(trans_vel)-trans_negative_min_vel)/(trans_negative_max_vel-trans_negative_min_vel)*(trans_negative_max_ratio-trans_negative_min_ratio) + trans_negative_min_ratio)
-//                    : 0;
-//     *trans_ratio *= -1;
-//   }
-//
-//   const double angular_min_ratio = 14.0;
-//   const double angular_max_ratio = 100.0;
-//   const double angular_min_rpm = 20.0;
-//   const double angular_max_rpm = 320.0;
-//   const double angular_min_vel = angular_min_rpm / 60.0 * tire_circumference_ / gear_ratio_ / tread_;
-//   const double angular_max_vel = angular_max_rpm / 60.0 * tire_circumference_ / gear_ratio_ / tread_;
-//   *angular_ratio = (std::fabs(angular_vel) > angular_min_vel)
-//                    ? ((std::fabs(angular_vel)-angular_min_vel)/(angular_max_vel-angular_min_vel)*(angular_max_ratio-angular_min_ratio) + angular_min_ratio)
-//                    : 0;
-//   if(angular_vel < 0) {
-//     *angular_ratio *= -1;
-//   }
-//
-//
-// //limit
-//   if(*trans_ratio > 100) {
-//     *trans_ratio = 100;
-//   }
-//   else if(*trans_ratio < -100) {
-//     *trans_ratio = -100;
-//   }
-//
-//   if(*angular_ratio > 100) {
-//     *angular_ratio = 100;
-//   }
-//   else if(*angular_ratio < -100) {
-//     *angular_ratio = -100;
-//   }
-// }
-//

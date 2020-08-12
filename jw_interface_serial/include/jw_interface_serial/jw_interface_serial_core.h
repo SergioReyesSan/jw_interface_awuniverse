@@ -48,9 +48,6 @@ class JwInterfaceSerial {
   unsigned char calcCheckSum(const std::vector<unsigned char> &cmd_array);
   std::array<u_char, 2> toHexString(const int val);
 
-  // void convertSpeedToStickRatio(const double trans_vel, const double angular_vel, int* const trans_ratio, int* const angular_ratio);
-  // void convertRpmToSpeed(const int right_motor_rpm, const int left_motor_rpm, double* const trans_vel, double* const angular_vel);
-
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
 
@@ -60,9 +57,6 @@ class JwInterfaceSerial {
 
   //rosparam
   std::string serial_port_;
-  double tire_circumference_;
-  double gear_ratio_;
-  double tread_;
   double vehicle_cmd_timeout_;
 
   // variable
