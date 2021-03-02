@@ -1,42 +1,33 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(jw_interface_msgs)
 
-find_package(
-  catkin REQUIRED COMPONENTS
-    message_generation
-    std_msgs
-)
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(std_msgs REQUIRED)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  DIRECTORY msg
-  FILES
-    ModeCommand.msg
-    JSADCommand.msg
-    MotorRPMCommand.msg
-
-    Command.msg
-    CommandStamped.msg
-
-    TimeStampStatus.msg
-    MotorRPMStatus.msg
-    BatteryStatus.msg
-    SpeedSettingStatus.msg
-    JSADStatus.msg
-
-    Status.msg
-    StatusStamped.msg
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/ModeCommand.msg"
+  "msg/JSADCommand.msg"
+  "msg/MotorRPMCommand.msg"
+  "msg/Command.msg"
+  "msg/CommandStamped.msg"
+  "msg/TimeStampStatus.msg"
+  "msg/MotorRPMStatus.msg"
+  "msg/BatteryStatus.msg"
+  "msg/SpeedSettingStatus.msg"
+  "msg/JSADStatus.msg"
+  "msg/Status.msg"
+  "msg/StatusStamped.msg"
+  DEPENDENCIES std_msgs
 )
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-    std_msgs
-)
-
-catkin_package(
-  CATKIN_DEPENDS
-    message_runtime
-    std_msgs
-)
+ament_package()
