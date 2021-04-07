@@ -1,29 +1,40 @@
 #include "jw_interface_serial/jw_interface_serial_core.h"
 
-JwInterfaceSerial::JwInterfaceSerial(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh)
-    : nh_(nh)
-    , private_nh_(private_nh_)
+JwInterfaceSerial::JwInterfaceSerial()
+    : Node("jw_interface_serial")
     , mode_cmd(serial_cmd_academic_mode)
     , speed_cmd(serial_cmd_stop)
     , serial_port_("/dev/ttyUSB0")
     , control_mode(ControlMode::ManualJwStick)
 {
+  using std::placeholders::_1;
 
   // rosparam
-  private_nh_.param<std::string>("serial_port", serial_port_, serial_port_);
-  private_nh_.param<double>("vehicle_cmd_timeout", vehicle_cmd_timeout_, 0.2);//[sec]
+  serial_port_ = this->declare_parameter<std::string>("serial_port", serial_port_);
+  vehicle_cmd_timeout_ = this->declare_parameter<double>("vehice_cmd_timeout", 0.2);//[sec]
 
   // Subscriber
-  command_sub_ = nh_.subscribe<jw_interface_msgs::CommandStamped>("/jw/command", 1, &JwInterfaceSerial::callbackCommand, this);
+  // command_sub_ = nh_.subscribe<jw_interface_msgs::msg::CommandStamped>("/jw/command", 1, &JwInterfaceSerial::callbackCommand, this);
+  command_sub_ = create_subscription<jw_interface_msgs::msg::CommandStamped>(
+    "/jw/command", 1, std::bind(&JwInterfaceSerial::callbackCommand, this, _1));
 
   // Publisher
-  status_pub_ = nh_.advertise<jw_interface_msgs::StatusStamped>("/jw/status", 10);
+  status_pub_ = create_publisher<jw_interface_msgs::msg::StatusStamped>(
+    "/jw/status", rclcpp::QoS{10}.transient_local());
 
   openSerial(serial_port_);
 
   std::thread serial_read_thread(&JwInterfaceSerial::readSerial, this);
   serial_read_thread.detach();
 
+  // Write Serial Timer
+  auto timer_callback = std::bind(&JwInterfaceSerial::writeSerial, this);
+  auto period = std::chrono::duration_cast<std::chrono::nanoseconds>(
+    std::chrono::duration<double>(1.0 / 50.0));
+  timer_ = std::make_shared<rclcpp::GenericTimer<decltype(timer_callback)>>(
+    this->get_clock(), period, std::move(timer_callback),
+    this->get_node_base_interface()->get_context());
+  this->get_node_timers_interface()->add_timer(timer_, nullptr);
 }
 
 JwInterfaceSerial::~JwInterfaceSerial()
@@ -31,23 +42,11 @@ JwInterfaceSerial::~JwInterfaceSerial()
   closeSerial();
 }
 
-void JwInterfaceSerial::run()
+void JwInterfaceSerial::callbackCommand(const jw_interface_msgs::msg::CommandStamped::ConstSharedPtr msg)
 {
-  ros::Rate loop_rate = 50;
-
-  while(ros::ok()) {
-    ros::spinOnce();
-    writeSerial();
-    loop_rate.sleep();
-  }
-
-}
-
-void JwInterfaceSerial::callbackCommand(const jw_interface_msgs::CommandStamped::ConstPtr &msg)
-{
-  if(vehicle_cmd_timeout_ < ros::Time::now().toSec() - msg->header.stamp.toSec())
+  if(vehicle_cmd_timeout_ < (rclcpp::Time(this->now()) - rclcpp::Time(msg->header.stamp)).seconds())
   {
-    ROS_WARN_THROTTLE(5, "vehicle_cmd msg timeout");
+    RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 5000, "vehicle_cmd msg timeout");
     return;
   }
 
@@ -205,8 +204,8 @@ void JwInterfaceSerial::readSerial()
 
       double trans_vel = 0, angular_vel = 0;
 
-      jw_interface_msgs::StatusStamped status_msg;
-      status_msg.header.stamp = ros::Time::now();
+      jw_interface_msgs::msg::StatusStamped status_msg;
+      status_msg.header.stamp = this->now();
       status_msg.header.frame_id = "base_link";
       status_msg.status.time_stamp.time_stamp = timestamp_str_int;
       status_msg.status.motor_rpm.left_rpm = l_motor_rpm_str_int;
@@ -219,7 +218,7 @@ void JwInterfaceSerial::readSerial()
 
       // convertRpmToSpeed(r_motor_rpm_str_int, l_motor_rpm_str_int, &trans_vel, &angular_vel);
 
-      status_pub_.publish(status_msg);
+      status_pub_->publish(status_msg);
     }
 
     // erase keep_buf

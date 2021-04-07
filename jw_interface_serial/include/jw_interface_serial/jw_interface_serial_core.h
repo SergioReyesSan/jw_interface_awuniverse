@@ -9,14 +9,14 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <unistd.h>
 
 
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
+#include "jw_interface_msgs/msg/command_stamped.hpp"
+#include "jw_interface_msgs/msg/status_stamped.hpp"
 
-#include <jw_interface_msgs/CommandStamped.h>
-#include <jw_interface_msgs/StatusStamped.h>
-
-class JwInterfaceSerial {
+class JwInterfaceSerial : public rclcpp::Node {
 
   enum class ControlMode {ManualJwStick, ManualJoyStick, Auto};
   // Header, SourceAdress, DestinationAdress, FrameNO, CoMmanD, BitC???, Data[], CHECK_SUM
@@ -31,13 +31,13 @@ class JwInterfaceSerial {
   const std::vector<unsigned char> serial_cmd_stop = {HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x69, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, CSUM_HEX};
 
  public:
-  JwInterfaceSerial(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh);
+  JwInterfaceSerial();
   ~JwInterfaceSerial();
 
   void run();
 
  private:
-  void callbackCommand(const jw_interface_msgs::CommandStamped::ConstPtr &msg);
+  void callbackCommand(const jw_interface_msgs::msg::CommandStamped::ConstSharedPtr msg);
 
   bool openSerial(const std::string port);
   bool closeSerial();
@@ -48,12 +48,11 @@ class JwInterfaceSerial {
   unsigned char calcCheckSum(const std::vector<unsigned char> &cmd_array);
   std::array<u_char, 2> toHexString(const int val);
 
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
+  rclcpp::Subscription<jw_interface_msgs::msg::CommandStamped>::SharedPtr command_sub_;
 
-  ros::Subscriber command_sub_;
+  rclcpp::Publisher<jw_interface_msgs::msg::StatusStamped>::SharedPtr status_pub_;
 
-  ros::Publisher status_pub_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   //rosparam
   std::string serial_port_;
