@@ -13,7 +13,7 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-ament_auto_add_executable(jw_interface_serial
+ament_auto_add_executable(jw_interface_serial_node
   src/jw_interface_serial_node.cpp
   src/jw_interface_serial_core.cpp
 )

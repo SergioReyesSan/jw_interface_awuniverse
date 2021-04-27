@@ -2,9 +2,9 @@
 
 JwInterfaceSerial::JwInterfaceSerial()
     : Node("jw_interface_serial")
+    , serial_port_("/dev/ttyUSB0")
     , mode_cmd(serial_cmd_academic_mode)
     , speed_cmd(serial_cmd_stop)
-    , serial_port_("/dev/ttyUSB0")
     , control_mode(ControlMode::ManualJwStick)
 {
   using std::placeholders::_1;
@@ -94,7 +94,7 @@ bool JwInterfaceSerial::openSerial(const std::string port)
   return true;
 }
 
-bool JwInterfaceSerial::closeSerial()
+void JwInterfaceSerial::closeSerial()
 {
   speed_cmd = serial_cmd_stop;
   writeSerial();
@@ -106,7 +106,7 @@ bool JwInterfaceSerial::closeSerial()
 
 void JwInterfaceSerial::readSerial()
 {
-  int buf_size = 64;
+  const int buf_size = 64;
   std::deque<u_char> keep_buf;
 
   auto received_time = std::chrono::system_clock::now();
@@ -202,7 +202,7 @@ void JwInterfaceSerial::readSerial()
       lr_js_ad_str_int <<= 8;
       lr_js_ad_str_int = (lr_js_ad_str_int | keep_buf[19]);
 
-      double trans_vel = 0, angular_vel = 0;
+      // double trans_vel = 0, angular_vel = 0;
 
       jw_interface_msgs::msg::StatusStamped status_msg;
       status_msg.header.stamp = this->now();
@@ -257,7 +257,7 @@ void JwInterfaceSerial::writeSerial()
 
 //set write buf
   unsigned char buf[command.size()] = {0};
-  for(int i=0; i<command.size(); ++i) {
+  for(long unsigned int i=0; i<command.size(); ++i) {
     buf[i] = command[i];
   }
 

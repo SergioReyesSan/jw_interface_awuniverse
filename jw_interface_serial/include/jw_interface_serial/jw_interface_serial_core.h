@@ -40,7 +40,7 @@ class JwInterfaceSerial : public rclcpp::Node {
   void callbackCommand(const jw_interface_msgs::msg::CommandStamped::ConstSharedPtr msg);
 
   bool openSerial(const std::string port);
-  bool closeSerial();
+  void closeSerial();
 
   void readSerial();
   void writeSerial();
