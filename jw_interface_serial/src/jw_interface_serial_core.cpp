@@ -156,6 +156,10 @@ void JwInterfaceSerial::readSerial()
       read_size = 15;
     }
     else {
+      if (keep_buf[4] != 0xe9 && keep_buf[4] != 0xe8)
+      {
+        keep_buf.pop_front();
+      }
       continue;
     }
 
