@@ -64,4 +64,5 @@ class JwInterfaceSerial : public rclcpp::Node {
   std::vector<unsigned char> mode_cmd, speed_cmd;
 
   ControlMode control_mode;
+  jw_interface_msgs::msg::StatusStamped status_msg_;
 };

@@ -6,6 +6,7 @@ JwInterfaceSerial::JwInterfaceSerial()
     , mode_cmd(serial_cmd_academic_mode)
     , speed_cmd(serial_cmd_stop)
     , control_mode(ControlMode::ManualJwStick)
+    , status_msg_()
 {
   using std::placeholders::_1;
 
@@ -132,7 +133,11 @@ void JwInterfaceSerial::readSerial()
         received_time = std::chrono::system_clock::now();
         mode_cmd = serial_cmd_academic_mode;
       }
-      std::this_thread::sleep_for(std::chrono::microseconds(5000));
+      status_msg_.header.stamp = this->now();
+      status_msg_.status.motor_rpm.left_rpm = 0.0;
+      status_msg_.status.motor_rpm.right_rpm = 0.0;
+      status_pub_->publish(status_msg_);
+      std::this_thread::sleep_for(std::chrono::microseconds(10000));
       continue;
     }
 
@@ -208,21 +213,20 @@ void JwInterfaceSerial::readSerial()
 
       // double trans_vel = 0, angular_vel = 0;
 
-      jw_interface_msgs::msg::StatusStamped status_msg;
-      status_msg.header.stamp = this->now();
-      status_msg.header.frame_id = "base_link";
-      status_msg.status.time_stamp.time_stamp = timestamp_str_int;
-      status_msg.status.motor_rpm.left_rpm = l_motor_rpm_str_int;
-      status_msg.status.motor_rpm.right_rpm = r_motor_rpm_str_int;
-      status_msg.status.battery.amperage = batt_ampere_str_int;
-      status_msg.status.battery.charge = batt_percent_str_int;
-      status_msg.status.speed_setting.speed_setting = speed_setting_str_int;
-      status_msg.status.js_ad.front_back_ratio = fb_js_ad_str_int;
-      status_msg.status.js_ad.left_right_ratio = lr_js_ad_str_int;
+      status_msg_.header.stamp = this->now();
+      status_msg_.header.frame_id = "base_link";
+      status_msg_.status.time_stamp.time_stamp = timestamp_str_int;
+      status_msg_.status.motor_rpm.left_rpm = l_motor_rpm_str_int;
+      status_msg_.status.motor_rpm.right_rpm = r_motor_rpm_str_int;
+      status_msg_.status.battery.amperage = batt_ampere_str_int;
+      status_msg_.status.battery.charge = batt_percent_str_int;
+      status_msg_.status.speed_setting.speed_setting = speed_setting_str_int;
+      status_msg_.status.js_ad.front_back_ratio = fb_js_ad_str_int;
+      status_msg_.status.js_ad.left_right_ratio = lr_js_ad_str_int;
 
       // convertRpmToSpeed(r_motor_rpm_str_int, l_motor_rpm_str_int, &trans_vel, &angular_vel);
 
-      status_pub_->publish(status_msg);
+      status_pub_->publish(status_msg_);
     }
 
     // erase keep_buf
