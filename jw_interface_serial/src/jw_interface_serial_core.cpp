@@ -125,18 +125,19 @@ void JwInterfaceSerial::readSerial()
     else {
       const auto now_time = std::chrono::system_clock::now();
       const auto diff_time = std::chrono::duration_cast<std::chrono::microseconds>(now_time - received_time).count() / 1000.0;
-      if(diff_time > 1000.0) {
+      if(diff_time > 100.0) {
         std::cout << "reopen serial" << std::endl;
         closeSerial();
         std::this_thread::sleep_for(std::chrono::microseconds(1000));
         openSerial(serial_port_);
         received_time = std::chrono::system_clock::now();
         mode_cmd = serial_cmd_academic_mode;
+        status_msg_.header.stamp = this->now();
+        status_msg_.status.motor_rpm.left_rpm = 0.0;
+        status_msg_.status.motor_rpm.right_rpm = 0.0;
+        status_pub_->publish(status_msg_);
       }
-      status_msg_.header.stamp = this->now();
-      status_msg_.status.motor_rpm.left_rpm = 0.0;
-      status_msg_.status.motor_rpm.right_rpm = 0.0;
-      status_pub_->publish(status_msg_);
+
       std::this_thread::sleep_for(std::chrono::microseconds(10000));
       continue;
     }
