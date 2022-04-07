@@ -16,7 +16,6 @@ find_package(std_msgs REQUIRED)
 ## Generate messages in the 'msg' folder
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ModeCommand.msg"
-  "msg/JSADCommand.msg"
   "msg/MotorRPMCommand.msg"
   "msg/Command.msg"
   "msg/CommandStamped.msg"
@@ -24,7 +23,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/MotorRPMStatus.msg"
   "msg/BatteryStatus.msg"
   "msg/SpeedSettingStatus.msg"
+# spell-checker:disable
+  "msg/JSADCommand.msg"
   "msg/JSADStatus.msg"
+# spell-checker:enable
   "msg/Status.msg"
   "msg/StatusStamped.msg"
   DEPENDENCIES std_msgs

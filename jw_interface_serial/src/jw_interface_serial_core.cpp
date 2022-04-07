@@ -1,4 +1,18 @@
-#include "jw_interface_serial/jw_interface_serial_core.h"
+// Copyright 2022 Tier IV, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "jw_interface_serial/jw_interface_serial_core.hpp"
 
 JwInterfaceSerial::JwInterfaceSerial()
     : Node("jw_interface_serial")
@@ -12,7 +26,7 @@ JwInterfaceSerial::JwInterfaceSerial()
 
   // rosparam
   serial_port_ = this->declare_parameter<std::string>("serial_port", serial_port_);
-  vehicle_cmd_timeout_ = this->declare_parameter<double>("vehice_cmd_timeout", 0.2);//[sec]
+  vehicle_cmd_timeout_ = this->declare_parameter<double>("vehicle_cmd_timeout", 0.2);//[sec]
 
   // Subscriber
   // command_sub_ = nh_.subscribe<jw_interface_msgs::msg::CommandStamped>("/jw/command", 1, &JwInterfaceSerial::callbackCommand, this);
@@ -81,8 +95,8 @@ bool JwInterfaceSerial::openSerial(const std::string port)
     return false;
   }
 
-  tcgetattr(fd, &oldtio);
-  tio = oldtio;
+  tcgetattr(fd, &old_tio);
+  tio = old_tio;
   tio.c_iflag = 0;
   tio.c_oflag = 0;
   tio.c_cflag |= (tio.c_cflag & ~CSIZE) | CS8 | CREAD | PARENB;
@@ -100,7 +114,7 @@ void JwInterfaceSerial::closeSerial()
   speed_cmd = serial_cmd_stop;
   writeSerial();
 
-  tcsetattr(fd, TCSANOW, &oldtio);
+  tcsetattr(fd, TCSANOW, &old_tio);
   close(fd);
   std::cout << "Serial port close." << std::endl;
 }
