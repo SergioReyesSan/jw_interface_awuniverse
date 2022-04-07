@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="loop_rate" default="50.0"/>
+  <arg name="vehicle_cmd_timeout_sec" default="0.5"/>
+  <node pkg="jw_interface_awiv_adapter" name="jw_interface_awiv_adapt_sender" exec="jw_interface_awiv_adapt_sender_node" output="log" >
+    <param name="use_sim_time" value="$(env AW_ROS2_USE_SIM_TIME false)"/>
+    <param name="steering_offset_deg" value="0.0" />
+    <!-- try to improve straight running performance -->
+    <param name="angular_ratio_correction_cycle" value="0" />
+    <param name="angular_ratio_correction_coefficient" value="0" />
+    <param name="loop_rate" value="$(var loop_rate)"/>
+    <param name="vehicle_cmd_timeout_sec" value="$(var vehicle_cmd_timeout_sec)"/>
+  </node>
+  <node pkg="jw_interface_awiv_adapter" name="jw_interface_awiv_adapt_receiver" exec="jw_interface_awiv_adapt_receiver_node" output="log" >
+    <param name="use_sim_time" value="$(env AW_ROS2_USE_SIM_TIME false)"/>
+  </node>
+
+</launch>
