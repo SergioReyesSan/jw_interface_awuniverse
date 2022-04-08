@@ -80,11 +80,11 @@ void JwInterfaceAWIVAdaptReceiver::callbackVehicleStatus(
 
   autoware_auto_vehicle_msgs::msg::SteeringReport steering_status_msg;
   steering_status_msg.stamp = jw_status_msg_ptr->header.stamp;
-  steering_status_msg.steering_tire_angle =
-    velocity_status_msg.longitudinal_velocity != 0.0 ?
-    std::atan(
-    velocity_status_msg.heading_rate * wheel_base_ / velocity_status_msg.longitudinal_velocity) :
-    0.0;
+  steering_status_msg.steering_tire_angle = velocity_status_msg.longitudinal_velocity != 0.0
+                                              ? std::atan(
+                                                  velocity_status_msg.heading_rate * wheel_base_ /
+                                                  velocity_status_msg.longitudinal_velocity)
+                                              : 0.0;
   steering_status_pub_->publish(steering_status_msg);
 
   tier4_debug_msgs::msg::Float32Stamped steer_wheel_deg_msg;

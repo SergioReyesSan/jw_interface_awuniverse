@@ -14,25 +14,28 @@
 
 #pragma once
 
-#include <cstdio>
-#include <cstdlib>
-#include <thread>
-#include <deque>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <unistd.h>
-
-
 #include "rclcpp/rclcpp.hpp"
+
 #include "jw_interface_msgs/msg/command_stamped.hpp"
 #include "jw_interface_msgs/msg/status_stamped.hpp"
 
-class JwInterfaceSerial : public rclcpp::Node {
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <unistd.h>
 
-  enum class ControlMode {ManualJwStick, ManualJoyStick, Auto};
+#include <cstdio>
+#include <cstdlib>
+#include <deque>
+#include <string>
+#include <thread>
+#include <vector>
+
+class JwInterfaceSerial : public rclcpp::Node
+{
+  enum class ControlMode { ManualJwStick, ManualJoyStick, Auto };
   // Header, SourceAddress, DestinationAddress, FrameNO, CoMmanD, BitC???, Data[], CHECK_SUM
   const unsigned char HEADER_HEX = 0x01;
   const unsigned char SA_HEX = 0x08;
@@ -40,17 +43,23 @@ class JwInterfaceSerial : public rclcpp::Node {
   const unsigned char FNO_HEX = 0x00;
   const unsigned char CSUM_HEX = 0x00;
 
-  const std::vector<unsigned char> serial_cmd_academic_mode = {HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x68, 0x08, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00};
-  const std::vector<unsigned char> serial_cmd_normal_mode = {HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x68, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-  const std::vector<unsigned char> serial_cmd_stop = {HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x69, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, CSUM_HEX};
+  const std::vector<unsigned char> serial_cmd_academic_mode = {
+    HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x68, 0x08, 0x01, 0x00,
+    0x00,       0x00,   0x01,   0x00,    0x00, 0x00, 0x00};
+  const std::vector<unsigned char> serial_cmd_normal_mode = {
+    HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x68, 0x08, 0x00, 0x00,
+    0x00,       0x00,   0x00,   0x00,    0x00, 0x00, 0x00};
+  const std::vector<unsigned char> serial_cmd_stop = {
+    HEADER_HEX, SA_HEX, DA_HEX, FNO_HEX, 0x69, 0x10, 0x02, 0x00, 0x00, 0x00, 0x00,    0x00,
+    0x00,       0x00,   0x00,   0x00,    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, CSUM_HEX};
 
- public:
+public:
   JwInterfaceSerial();
   ~JwInterfaceSerial();
 
   void run();
 
- private:
+private:
   void callbackCommand(const jw_interface_msgs::msg::CommandStamped::ConstSharedPtr msg);
 
   bool openSerial(const std::string port);
@@ -59,7 +68,7 @@ class JwInterfaceSerial : public rclcpp::Node {
   void readSerial();
   void writeSerial();
 
-  unsigned char calcCheckSum(const std::vector<unsigned char> &cmd_array);
+  unsigned char calcCheckSum(const std::vector<unsigned char> & cmd_array);
   std::array<u_char, 2> toHexString(const int val);
 
   rclcpp::Subscription<jw_interface_msgs::msg::CommandStamped>::SharedPtr command_sub_;
@@ -68,7 +77,7 @@ class JwInterfaceSerial : public rclcpp::Node {
 
   rclcpp::TimerBase::SharedPtr timer_;
 
-  //rosparam
+  // rosparam
   std::string serial_port_;
   double vehicle_cmd_timeout_;
 

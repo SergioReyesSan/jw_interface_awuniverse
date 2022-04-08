@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
 #include "jw_interface_awiv_adapt_sender/jw_interface_awiv_adapt_sender.hpp"
+
+#include <memory>
 
 JwInterfaceAWIVAdaptSender::JwInterfaceAWIVAdaptSender(const rclcpp::NodeOptions & node_options)
 : Node("jw_interface_awiv_adapt_sender", node_options),
@@ -28,8 +28,8 @@ JwInterfaceAWIVAdaptSender::JwInterfaceAWIVAdaptSender(const rclcpp::NodeOptions
   steering_offset_deg_ = this->declare_parameter<double>("steering_offset_deg", 0.0);
   angular_ratio_correction_cycle_ =
     this->declare_parameter<int>("angular_ratio_correction_cycle", 0);
-  angular_ratio_correction_coefficient_ = this->declare_parameter<int>(
-    "angular_ratio_correction_coefficient", 0);
+  angular_ratio_correction_coefficient_ =
+    this->declare_parameter<int>("angular_ratio_correction_coefficient", 0);
   loop_rate_ = declare_parameter<double>("loop_rate", 50.0);
   vehicle_cmd_timeout_sec_ = declare_parameter<double>("vehicle_cmd_timeout_sec", 1.0);
 
@@ -98,17 +98,17 @@ void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
 
   geometry_msgs::msg::Twist twist_cmd;
   twist_cmd.linear.x = msg_ptr->longitudinal.speed;
-  twist_cmd.angular.z = msg_ptr->longitudinal.speed * std::tan(
-    msg_ptr->lateral.steering_tire_angle + steering_offset_rad) / wheel_base_;
+  twist_cmd.angular.z = msg_ptr->longitudinal.speed *
+                        std::tan(msg_ptr->lateral.steering_tire_angle + steering_offset_rad) /
+                        wheel_base_;
 
   int trans_ratio{0};
   int angular_ratio{0};
-  if (!is_emergency_ &&
-    gear_cmd_ptr_->command != autoware_auto_vehicle_msgs::msg::GearCommand::PARK)
-  {
+  if (
+    !is_emergency_ &&
+    gear_cmd_ptr_->command != autoware_auto_vehicle_msgs::msg::GearCommand::PARK) {
     convertSpeedToStickRatio(
-      twist_cmd.linear.x, -twist_cmd.angular.z, &trans_ratio,
-      &angular_ratio);
+      twist_cmd.linear.x, -twist_cmd.angular.z, &trans_ratio, &angular_ratio);
   }
 
   jw_command_stamped_msg_.command.js_ad.front_back_ratio = trans_ratio;
@@ -131,7 +131,6 @@ void JwInterfaceAWIVAdaptSender::callbackEngage(
   jw_engage_pub_->publish(engage_msg);
 }
 
-
 void JwInterfaceAWIVAdaptSender::callbackGearCmd(
   const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg_ptr)
 {
@@ -145,9 +144,7 @@ void JwInterfaceAWIVAdaptSender::callbackEmergencyCmd(
 }
 
 void JwInterfaceAWIVAdaptSender::convertSpeedToStickRatio(
-  const double trans_vel,
-  const double angular_vel,
-  int * const trans_ratio,
+  const double trans_vel, const double angular_vel, int * const trans_ratio,
   int * const angular_ratio)
 {
   const double gear_ratio = 12.64;
@@ -160,24 +157,26 @@ void JwInterfaceAWIVAdaptSender::convertSpeedToStickRatio(
     const double trans_max_rpm = 1680.0;
     const double trans_min_vel = trans_min_rpm / 60.0 * tire_circumference / gear_ratio / 2.0;
     const double trans_max_vel = trans_max_rpm / 60.0 * tire_circumference / gear_ratio / 2.0;
-    *trans_ratio = (trans_vel > trans_min_vel) ?
-      ((trans_vel - trans_min_vel) / (trans_max_vel - trans_min_vel) *
-      (trans_max_ratio - trans_min_ratio) + trans_min_ratio) :
-      0;
+    *trans_ratio = (trans_vel > trans_min_vel)
+                     ? ((trans_vel - trans_min_vel) / (trans_max_vel - trans_min_vel) *
+                          (trans_max_ratio - trans_min_ratio) +
+                        trans_min_ratio)
+                     : 0;
   } else {
     const double trans_negative_min_ratio = 5.0;
     const double trans_negative_max_ratio = 100.0;
     const double trans_negative_min_rpm = 15.0;
     const double trans_negative_max_rpm = 815.0;
-    const double trans_negative_min_vel = trans_negative_min_rpm / 60.0 * tire_circumference /
-      gear_ratio / 2.0;
-    const double trans_negative_max_vel = trans_negative_max_rpm / 60.0 * tire_circumference /
-      gear_ratio / 2.0;
-    *trans_ratio = (std::fabs(trans_vel) > trans_negative_min_vel) ?
-      ((std::fabs(trans_vel) - trans_negative_min_vel) /
-      (trans_negative_max_vel - trans_negative_min_vel) *
-      (trans_negative_max_ratio - trans_negative_min_ratio) + trans_negative_min_ratio) :
-      0;
+    const double trans_negative_min_vel =
+      trans_negative_min_rpm / 60.0 * tire_circumference / gear_ratio / 2.0;
+    const double trans_negative_max_vel =
+      trans_negative_max_rpm / 60.0 * tire_circumference / gear_ratio / 2.0;
+    *trans_ratio = (std::fabs(trans_vel) > trans_negative_min_vel)
+                     ? ((std::fabs(trans_vel) - trans_negative_min_vel) /
+                          (trans_negative_max_vel - trans_negative_min_vel) *
+                          (trans_negative_max_ratio - trans_negative_min_ratio) +
+                        trans_negative_min_ratio)
+                     : 0;
     *trans_ratio *= -1;
   }
 
@@ -185,22 +184,24 @@ void JwInterfaceAWIVAdaptSender::convertSpeedToStickRatio(
   const double angular_max_ratio = 100.0;
   const double angular_min_rpm = 20;
   const double angular_max_rpm = 320.0;
-  const double angular_min_vel = angular_min_rpm / 60.0 * tire_circumference / gear_ratio /
-    wheel_tread_;
-  const double angular_max_vel = angular_max_rpm / 60.0 * tire_circumference / gear_ratio /
-    wheel_tread_;
-  *angular_ratio = (std::fabs(angular_vel) > angular_min_vel) ?
-    ((std::fabs(angular_vel) - angular_min_vel) / (angular_max_vel - angular_min_vel) *
-    (angular_max_ratio - angular_min_ratio) + angular_min_ratio) :
-    0;
+  const double angular_min_vel =
+    angular_min_rpm / 60.0 * tire_circumference / gear_ratio / wheel_tread_;
+  const double angular_max_vel =
+    angular_max_rpm / 60.0 * tire_circumference / gear_ratio / wheel_tread_;
+  *angular_ratio =
+    (std::fabs(angular_vel) > angular_min_vel)
+      ? ((std::fabs(angular_vel) - angular_min_vel) / (angular_max_vel - angular_min_vel) *
+           (angular_max_ratio - angular_min_ratio) +
+         angular_min_ratio)
+      : 0;
   if (angular_vel < 0) {
     *angular_ratio *= -1;
   }
 
   static int cycle_count = 0;
-  if (angular_ratio_correction_cycle_ > 0 && cycle_count++ >= angular_ratio_correction_cycle_ &&
-    *angular_ratio == 0 && *trans_ratio != 0)
-  {
+  if (
+    angular_ratio_correction_cycle_ > 0 && cycle_count++ >= angular_ratio_correction_cycle_ &&
+    *angular_ratio == 0 && *trans_ratio != 0) {
     cycle_count = 0;
     *angular_ratio += angular_ratio_correction_coefficient_;
   }

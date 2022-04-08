@@ -21,14 +21,14 @@
 #include <autoware_auto_vehicle_msgs/msg/gear_report.hpp>
 #include <autoware_auto_vehicle_msgs/msg/steering_report.hpp>
 // #include <autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp>
+#include "vehicle_info_util/vehicle_info_util.hpp"
+
 #include <autoware_auto_vehicle_msgs/msg/velocity_report.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <jw_interface_msgs/msg/status_stamped.hpp>
 #include <tier4_debug_msgs/msg/bool_stamped.hpp>
 #include <tier4_debug_msgs/msg/float32_stamped.hpp>
 #include <tier4_vehicle_msgs/msg/battery_status.hpp>
-
-#include "vehicle_info_util/vehicle_info_util.hpp"
 
 class JwInterfaceAWIVAdaptReceiver : public rclcpp::Node
 {

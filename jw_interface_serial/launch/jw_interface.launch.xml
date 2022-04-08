@@ -4,8 +4,7 @@
 
   <node pkg="jw_interface_serial" name="jw_interface" exec="jw_interface_serial_node" output="screen">
     <param name="use_sim_time" value="$(env AW_ROS2_USE_SIM_TIME false)"/>
-    <param name="serial_port" value="$(var serial_port)" />
-    <param name="vehicle_cmd_timeout" value="$(var vehicle_cmd_timeout)" />
+    <param name="serial_port" value="$(var serial_port)"/>
+    <param name="vehicle_cmd_timeout" value="$(var vehicle_cmd_timeout)"/>
   </node>
-
 </launch>

@@ -14,8 +14,8 @@
 
 #include "jw_interface_serial/jw_interface_serial_core.hpp"
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char * argv[])
+{
   rclcpp::init(argc, argv);
 
   rclcpp::spin(std::make_shared<JwInterfaceSerial>());
