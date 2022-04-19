@@ -35,7 +35,7 @@ JwInterfaceAWIVAdaptSender::JwInterfaceAWIVAdaptSender(const rclcpp::NodeOptions
 
   // subscriber
   control_cmd_sub_ = create_subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>(
-    "/control/commnad/control_cmd", 1,
+    "/control/command/control_cmd", 1,
     std::bind(&JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd, this, _1));
   // turn_signal_cmd_sub_ = create_subscription(
   //  "/control/turn_signal_cmd", 1,
