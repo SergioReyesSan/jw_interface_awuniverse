@@ -91,6 +91,11 @@ void JwInterfaceAWIVAdaptSender::publishCommand()
 void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
   const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg_ptr)
 {
+  if (!gear_cmd_ptr_) {
+    RCLCPP_WARN_STREAM(this->get_logger(), "gear command is not subscribed");
+    return;
+  }
+
   double steering_offset_rad = steering_offset_deg_ * M_PI / 180.0;
   jw_command_stamped_msg_.header.stamp = msg_ptr->stamp;
 
