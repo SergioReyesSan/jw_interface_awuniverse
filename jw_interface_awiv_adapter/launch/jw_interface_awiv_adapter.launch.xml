@@ -11,9 +11,9 @@
     <param name="angular_ratio_correction_coefficient" value="0"/>
     <param name="loop_rate" value="$(var loop_rate)"/>
     <param name="vehicle_cmd_timeout_sec" value="$(var vehicle_cmd_timeout_sec)"/>
-    <param from="$(var vehicle_calibration_param_path)"/>
   </node>
   <node pkg="jw_interface_awiv_adapter" name="jw_interface_awiv_adapt_receiver" exec="jw_interface_awiv_adapt_receiver_node" output="log">
     <param name="use_sim_time" value="$(env AW_ROS2_USE_SIM_TIME false)"/>
+    <param from="$(var vehicle_calibration_param_path)"/>
   </node>
 </launch>
