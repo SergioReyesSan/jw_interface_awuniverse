@@ -25,6 +25,7 @@ JwInterfaceAWIVAdaptReceiver::JwInterfaceAWIVAdaptReceiver(const rclcpp::NodeOpt
   wheel_base_ = vehicle_info_.wheel_base_m;
   wheel_tread_ = vehicle_info_.wheel_tread_m;
   wheel_radius_ = vehicle_info_.wheel_radius_m;
+  speed_scale_factor_ = declare_parameter<double>("speed_scale_factor", 1.0);
 
   // subscriber
   vehicle_status_sub_ = create_subscription<jw_interface_msgs::msg::StatusStamped>(
@@ -108,8 +109,8 @@ autoware_auto_vehicle_msgs::msg::VelocityReport JwInterfaceAWIVAdaptReceiver::co
 
   const double right_velocity = motor_rpm_msg.right_rpm / 60.0 * tire_circumference / gear_ratio;
   const double left_velocity = motor_rpm_msg.left_rpm / 60.0 * tire_circumference / gear_ratio;
-  twist.longitudinal_velocity = (right_velocity + left_velocity) / 2.0;
-  twist.heading_rate = (right_velocity - left_velocity) / wheel_tread_;
+  twist.longitudinal_velocity = (right_velocity + left_velocity) / 2.0 * speed_scale_factor_;
+  twist.heading_rate = (right_velocity - left_velocity) / wheel_tread_ * speed_scale_factor_;
 
   // std::cout << "v:" << twist.linear.x << " w:" << twist.angular.z << std::endl;
 

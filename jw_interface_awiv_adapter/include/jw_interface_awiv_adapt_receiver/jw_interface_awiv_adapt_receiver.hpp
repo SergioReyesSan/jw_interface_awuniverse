@@ -63,6 +63,7 @@ private:
   double wheel_base_;
   double wheel_tread_;
   double wheel_radius_;
+  double speed_scale_factor_;
 };
 
 #endif  // JW_INTERFACE_AWIV_ADAPT_RECEIVER__JW_INTERFACE_AWIV_ADAPT_RECEIVER_HPP_
