@@ -7,11 +7,15 @@ repositories:
     type: git
     url: https://github.com/tier4/autoware.universe.git
     version: tier4/main
-  autoware/tier4_autoware_msgs:
+  msgs/tier4_autoware_msgs:
     type: git
     url: https://github.com/tier4/tier4_autoware_msgs.git
     version: tier4/universe
-  autoware/auto_msgs:
+  msgs/auto_msgs:
     type: git
     url: https://github.com/tier4/autoware_auto_msgs.git
     version: tier4/main
+  msgs/autoware_msgs:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_msgs.git
+    version: main
