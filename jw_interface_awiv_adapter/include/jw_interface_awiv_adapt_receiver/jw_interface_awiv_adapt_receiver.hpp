@@ -17,13 +17,13 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_auto_vehicle_msgs/msg/control_mode_report.hpp>
-#include <autoware_auto_vehicle_msgs/msg/gear_report.hpp>
-#include <autoware_auto_vehicle_msgs/msg/steering_report.hpp>
-// #include <autoware_auto_vehicle_msgs/msg/turn_indicators_report.hpp>
-#include "vehicle_info_util/vehicle_info_util.hpp"
+#include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
+#include <autoware_vehicle_msgs/msg/gear_report.hpp>
+#include <autoware_vehicle_msgs/msg/steering_report.hpp>
+// #include <autoware_vehicle_msgs/msg/turn_indicators_report.hpp>
+#include <autoware_vehicle_info_utils/vehicle_info_utils.hpp>
 
-#include <autoware_auto_vehicle_msgs/msg/velocity_report.hpp>
+#include <autoware_vehicle_msgs/msg/velocity_report.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <jw_interface_msgs/msg/status_stamped.hpp>
 #include <tier4_debug_msgs/msg/bool_stamped.hpp>
@@ -39,27 +39,28 @@ private:
   void callbackVehicleStatus(
     const jw_interface_msgs::msg::StatusStamped::ConstSharedPtr vehicle_status_msg_ptr);
 
-  autoware_auto_vehicle_msgs::msg::VelocityReport convertRpmToTwist(
+  autoware_vehicle_msgs::msg::VelocityReport convertRpmToTwist(
     const jw_interface_msgs::msg::MotorRPMStatus & motor_rpm_msg);
 
   // ros subscriber
   rclcpp::Subscription<jw_interface_msgs::msg::StatusStamped>::SharedPtr vehicle_status_sub_;
 
   // ros publisher
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::ControlModeReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::ControlModeReport>::SharedPtr
     control_mode_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::GearReport>::SharedPtr gear_status_pub_;
-  // rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::TurnIndicatorsReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::GearReport>::SharedPtr gear_status_pub_;
+  // rclcpp::Publisher<autoware_vehicle_msgs::msg::TurnIndicatorsReport>::SharedPtr
   // turn_indicators_status_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::VelocityReport>::SharedPtr
     velocity_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr velocity_kmph_pub_;
-  rclcpp::Publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>::SharedPtr
+  rclcpp::Publisher<autoware_vehicle_msgs::msg::SteeringReport>::SharedPtr
     steering_status_pub_;
   rclcpp::Publisher<tier4_debug_msgs::msg::Float32Stamped>::SharedPtr steer_wheel_deg_pub_;
   rclcpp::Publisher<tier4_vehicle_msgs::msg::BatteryStatus>::SharedPtr battery_charge_status_pub_;
 
-  vehicle_info_util::VehicleInfo vehicle_info_;
+  // autoware_vehicle_info_utils::VehicleInfo vehicle_info_;
+  autoware::vehicle_info_utils::VehicleInfo vehicle_info_;
   double wheel_base_;
   double wheel_tread_;
   double wheel_radius_;

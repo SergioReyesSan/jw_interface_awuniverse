@@ -18,7 +18,7 @@
 
 JwInterfaceAWIVAdaptReceiver::JwInterfaceAWIVAdaptReceiver(const rclcpp::NodeOptions & node_options)
 : Node("jw_interface_awiv_adapt_receiver", node_options),
-  vehicle_info_(vehicle_info_util::VehicleInfoUtil(*this).getVehicleInfo())
+  vehicle_info_(autoware::vehicle_info_utils::VehicleInfoUtils(*this).getVehicleInfo())
 {
   using std::placeholders::_1;
 
@@ -32,17 +32,17 @@ JwInterfaceAWIVAdaptReceiver::JwInterfaceAWIVAdaptReceiver(const rclcpp::NodeOpt
     "/jw/status", 1, std::bind(&JwInterfaceAWIVAdaptReceiver::callbackVehicleStatus, this, _1));
 
   // publisher
-  control_mode_status_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::ControlModeReport>(
+  control_mode_status_pub_ = create_publisher<autoware_vehicle_msgs::msg::ControlModeReport>(
     "/vehicle/status/control_mode", rclcpp::QoS{10}.transient_local());
-  gear_status_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::GearReport>(
+  gear_status_pub_ = create_publisher<autoware_vehicle_msgs::msg::GearReport>(
     "/vehicle/status/gear_status", rclcpp::QoS{10}.transient_local());
-  // turn_signal_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::TurnIndicatorsStatus>(
+  // turn_signal_pub_ = create_publisher<autoware_vehicle_msgs::msg::TurnIndicatorsStatus>(
   // "/vehicle/status/turn_indicators_status", rclcpp::QoS{10}.transient_local());
-  velocity_status_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::VelocityReport>(
+  velocity_status_pub_ = create_publisher<autoware_vehicle_msgs::msg::VelocityReport>(
     "/vehicle/status/velocity_status", rclcpp::QoS{10}.transient_local());
   velocity_kmph_pub_ = create_publisher<tier4_debug_msgs::msg::Float32Stamped>(
     "/vehicle/status/velocity_kmph", rclcpp::QoS{10}.transient_local());
-  steering_status_pub_ = create_publisher<autoware_auto_vehicle_msgs::msg::SteeringReport>(
+  steering_status_pub_ = create_publisher<autoware_vehicle_msgs::msg::SteeringReport>(
     "/vehicle/status/steering_status", rclcpp::QoS{10}.transient_local());
   steer_wheel_deg_pub_ = create_publisher<tier4_debug_msgs::msg::Float32Stamped>(
     "/vehicle/status/steering_wheel_deg", rclcpp::QoS{10}.transient_local());
@@ -53,22 +53,22 @@ JwInterfaceAWIVAdaptReceiver::JwInterfaceAWIVAdaptReceiver(const rclcpp::NodeOpt
 void JwInterfaceAWIVAdaptReceiver::callbackVehicleStatus(
   const jw_interface_msgs::msg::StatusStamped::ConstSharedPtr jw_status_msg_ptr)
 {
-  autoware_auto_vehicle_msgs::msg::ControlModeReport control_mode_status_msg;
+  autoware_vehicle_msgs::msg::ControlModeReport control_mode_status_msg;
   control_mode_status_msg.stamp = jw_status_msg_ptr->header.stamp;
   // TODO(someone): fix handling control mode
-  control_mode_status_msg.mode = autoware_auto_vehicle_msgs::msg::ControlModeReport::AUTONOMOUS;
+  control_mode_status_msg.mode = autoware_vehicle_msgs::msg::ControlModeReport::AUTONOMOUS;
   control_mode_status_pub_->publish(control_mode_status_msg);
 
   auto velocity_status_msg = convertRpmToTwist(jw_status_msg_ptr->status.motor_rpm);
   velocity_status_msg.header = jw_status_msg_ptr->header;
   velocity_status_pub_->publish(velocity_status_msg);
 
-  autoware_auto_vehicle_msgs::msg::GearReport gear_report_msg;
+  autoware_vehicle_msgs::msg::GearReport gear_report_msg;
   gear_report_msg.stamp = jw_status_msg_ptr->header.stamp;
   if (velocity_status_msg.longitudinal_velocity >= 0.0) {
-    gear_report_msg.report = autoware_auto_vehicle_msgs::msg::GearReport::DRIVE;
+    gear_report_msg.report = autoware_vehicle_msgs::msg::GearReport::DRIVE;
   } else {
-    gear_report_msg.report = autoware_auto_vehicle_msgs::msg::GearReport::REVERSE;
+    gear_report_msg.report = autoware_vehicle_msgs::msg::GearReport::REVERSE;
   }
   gear_status_pub_->publish(gear_report_msg);
 
@@ -79,7 +79,7 @@ void JwInterfaceAWIVAdaptReceiver::callbackVehicleStatus(
   velocity_kmph_msg.stamp = this->now();
   velocity_kmph_pub_->publish(velocity_kmph_msg);
 
-  autoware_auto_vehicle_msgs::msg::SteeringReport steering_status_msg;
+  autoware_vehicle_msgs::msg::SteeringReport steering_status_msg;
   steering_status_msg.stamp = jw_status_msg_ptr->header.stamp;
   steering_status_msg.steering_tire_angle = velocity_status_msg.longitudinal_velocity != 0.0
                                               ? std::atan(
@@ -99,10 +99,10 @@ void JwInterfaceAWIVAdaptReceiver::callbackVehicleStatus(
   battery_charge_status_pub_->publish(battery_charge_msg);
 }
 
-autoware_auto_vehicle_msgs::msg::VelocityReport JwInterfaceAWIVAdaptReceiver::convertRpmToTwist(
+autoware_vehicle_msgs::msg::VelocityReport JwInterfaceAWIVAdaptReceiver::convertRpmToTwist(
   const jw_interface_msgs::msg::MotorRPMStatus & motor_rpm_msg)
 {
-  autoware_auto_vehicle_msgs::msg::VelocityReport twist;
+  autoware_vehicle_msgs::msg::VelocityReport twist;
 
   const double gear_ratio = 12.64;
   const double tire_circumference = 2.0 * M_PI * wheel_radius_;

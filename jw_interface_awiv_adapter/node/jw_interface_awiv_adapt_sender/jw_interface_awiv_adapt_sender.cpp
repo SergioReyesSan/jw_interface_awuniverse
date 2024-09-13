@@ -18,7 +18,7 @@
 
 JwInterfaceAWIVAdaptSender::JwInterfaceAWIVAdaptSender(const rclcpp::NodeOptions & node_options)
 : Node("jw_interface_awiv_adapt_sender", node_options),
-  vehicle_info_(vehicle_info_util::VehicleInfoUtil(*this).getVehicleInfo())
+  vehicle_info_(autoware::vehicle_info_utils::VehicleInfoUtils(*this).getVehicleInfo())
 {
   using std::placeholders::_1;
 
@@ -34,18 +34,18 @@ JwInterfaceAWIVAdaptSender::JwInterfaceAWIVAdaptSender(const rclcpp::NodeOptions
   vehicle_cmd_timeout_sec_ = declare_parameter<double>("vehicle_cmd_timeout_sec", 1.0);
 
   // subscriber
-  control_cmd_sub_ = create_subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>(
+  control_cmd_sub_ = create_subscription<autoware_control_msgs::msg::Control>(
     "/control/command/control_cmd", 1,
     std::bind(&JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd, this, _1));
   // turn_signal_cmd_sub_ = create_subscription(
   //  "/control/turn_signal_cmd", 1,
   //  std::bind(&JwInterfaceAWIVAdaptSender::callbackTurnSignalCmd, this, _1));
-  engage_cmd_sub_ = create_subscription<autoware_auto_vehicle_msgs::msg::Engage>(
+  engage_cmd_sub_ = create_subscription<autoware_vehicle_msgs::msg::Engage>(
     "/vehicle/engage", 1, std::bind(&JwInterfaceAWIVAdaptSender::callbackEngage, this, _1));
   emergency_cmd_sub_ = create_subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>(
     "/control/command/emergency_cmd", 1,
     std::bind(&JwInterfaceAWIVAdaptSender::callbackEmergencyCmd, this, _1));
-  gear_cmd_sub_ = create_subscription<autoware_auto_vehicle_msgs::msg::GearCommand>(
+  gear_cmd_sub_ = create_subscription<autoware_vehicle_msgs::msg::GearCommand>(
     "/control/command/gear_cmd", 1,
     std::bind(&JwInterfaceAWIVAdaptSender::callbackGearCmd, this, _1));
 
@@ -89,7 +89,7 @@ void JwInterfaceAWIVAdaptSender::publishCommand()
 }
 
 void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
-  const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg_ptr)
+  const autoware_control_msgs::msg::Control::ConstSharedPtr msg_ptr)
 {
   if (!gear_cmd_ptr_) {
     RCLCPP_WARN_STREAM(this->get_logger(), "gear command is not subscribed");
@@ -102,8 +102,8 @@ void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
   jw_command_stamped_msg_.command.mode.mode = jw_interface_msgs::msg::ModeCommand::JS_AD_CONTROL;
 
   geometry_msgs::msg::Twist twist_cmd;
-  twist_cmd.linear.x = msg_ptr->longitudinal.speed;
-  twist_cmd.angular.z = msg_ptr->longitudinal.speed *
+  twist_cmd.linear.x = msg_ptr->longitudinal.velocity;
+  twist_cmd.angular.z = msg_ptr->longitudinal.velocity *
                         std::tan(msg_ptr->lateral.steering_tire_angle + steering_offset_rad) /
                         wheel_base_;
 
@@ -111,7 +111,7 @@ void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
   int angular_ratio{0};
   if (
     !is_emergency_ &&
-    gear_cmd_ptr_->command != autoware_auto_vehicle_msgs::msg::GearCommand::PARK) {
+    gear_cmd_ptr_->command != autoware_vehicle_msgs::msg::GearCommand::PARK) {
     convertSpeedToStickRatio(
       twist_cmd.linear.x, -twist_cmd.angular.z, &trans_ratio, &angular_ratio);
   }
@@ -128,7 +128,7 @@ void JwInterfaceAWIVAdaptSender::callbackAckermannControlCmd(
 }
 
 void JwInterfaceAWIVAdaptSender::callbackEngage(
-  const autoware_auto_vehicle_msgs::msg::Engage::ConstSharedPtr msg_ptr)
+  const autoware_vehicle_msgs::msg::Engage::ConstSharedPtr msg_ptr)
 {
   tier4_debug_msgs::msg::BoolStamped engage_msg{};
   engage_msg.stamp = msg_ptr->stamp;
@@ -137,9 +137,9 @@ void JwInterfaceAWIVAdaptSender::callbackEngage(
 }
 
 void JwInterfaceAWIVAdaptSender::callbackGearCmd(
-  const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg_ptr)
+  const autoware_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg_ptr)
 {
-  gear_cmd_ptr_ = std::make_shared<autoware_auto_vehicle_msgs::msg::GearCommand>(*msg_ptr);
+  gear_cmd_ptr_ = std::make_shared<autoware_vehicle_msgs::msg::GearCommand>(*msg_ptr);
 }
 
 void JwInterfaceAWIVAdaptSender::callbackEmergencyCmd(

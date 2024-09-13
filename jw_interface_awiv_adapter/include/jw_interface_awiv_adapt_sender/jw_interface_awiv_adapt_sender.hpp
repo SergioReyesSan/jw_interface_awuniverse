@@ -17,14 +17,15 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <autoware_auto_control_msgs/msg/ackermann_control_command.hpp>
+//#include <autoware_auto_control_msgs/msg/ackermann_control_command.hpp>
+#include <autoware_control_msgs/msg/control.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <jw_interface_msgs/msg/command_stamped.hpp>
-// #include <autoware_auto_vehicle_msgs/msg/turn_indicators_command.hpp>
-#include "vehicle_info_util/vehicle_info_util.hpp"
+// #include <autoware_vehicle_msgs/msg/turn_indicators_command.hpp>
+#include <autoware_vehicle_info_utils/vehicle_info_utils.hpp>
 
-#include <autoware_auto_vehicle_msgs/msg/engage.hpp>
-#include <autoware_auto_vehicle_msgs/msg/gear_command.hpp>
+#include <autoware_vehicle_msgs/msg/engage.hpp>
+#include <autoware_vehicle_msgs/msg/gear_command.hpp>
 #include <tier4_debug_msgs/msg/bool_stamped.hpp>
 #include <tier4_vehicle_msgs/msg/vehicle_emergency_stamped.hpp>
 
@@ -35,11 +36,11 @@ public:
 
 private:
   void callbackAckermannControlCmd(
-    const autoware_auto_control_msgs::msg::AckermannControlCommand::ConstSharedPtr msg_ptr);
+    const autoware_control_msgs::msg::Control::ConstSharedPtr msg_ptr);
   // void callbackTurnSignalCmd(
-  //  const autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg_ptr);
-  void callbackEngage(const autoware_auto_vehicle_msgs::msg::Engage::ConstSharedPtr msg_ptr);
-  void callbackGearCmd(const autoware_auto_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg_ptr);
+  //  const autoware_vehicle_msgs::msg::TurnIndicatorsCommand::ConstSharedPtr msg_ptr);
+  void callbackEngage(const autoware_vehicle_msgs::msg::Engage::ConstSharedPtr msg_ptr);
+  void callbackGearCmd(const autoware_vehicle_msgs::msg::GearCommand::ConstSharedPtr msg_ptr);
   void callbackEmergencyCmd(
     const tier4_vehicle_msgs::msg::VehicleEmergencyStamped::ConstSharedPtr msg_ptr);
   void onTimer();
@@ -50,12 +51,12 @@ private:
     int * const angular_ratio);
 
   // ros subscriber
-  rclcpp::Subscription<autoware_auto_control_msgs::msg::AckermannControlCommand>::SharedPtr
+  rclcpp::Subscription<autoware_control_msgs::msg::Control>::SharedPtr
     control_cmd_sub_;
-  // rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::TurnIndicatorsCommand>::SharedPtr
+  // rclcpp::Subscription<autoware_vehicle_msgs::msg::TurnIndicatorsCommand>::SharedPtr
   // turn_signal_cmd_sub_;
-  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::Engage>::SharedPtr engage_cmd_sub_;
-  rclcpp::Subscription<autoware_auto_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
+  rclcpp::Subscription<autoware_vehicle_msgs::msg::Engage>::SharedPtr engage_cmd_sub_;
+  rclcpp::Subscription<autoware_vehicle_msgs::msg::GearCommand>::SharedPtr gear_cmd_sub_;
   rclcpp::Subscription<tier4_vehicle_msgs::msg::VehicleEmergencyStamped>::SharedPtr
     emergency_cmd_sub_;
 
@@ -67,14 +68,15 @@ private:
   jw_interface_msgs::msg::CommandStamped jw_command_stamped_msg_;
   rclcpp::TimerBase::SharedPtr cmd_timer_;
 
-  vehicle_info_util::VehicleInfo vehicle_info_;
+  // autoware_vehicle_info_utils::VehicleInfo vehicle_info_;
+  autoware::vehicle_info_utils::VehicleInfo vehicle_info_;
   double wheel_base_;
   double wheel_tread_;
   double wheel_radius_;
   double steering_offset_deg_;
   int angular_ratio_correction_cycle_;
   int angular_ratio_correction_coefficient_;
-  autoware_auto_vehicle_msgs::msg::GearCommand::SharedPtr gear_cmd_ptr_;
+  autoware_vehicle_msgs::msg::GearCommand::SharedPtr gear_cmd_ptr_;
   bool is_emergency_{false};
 
   double loop_rate_;

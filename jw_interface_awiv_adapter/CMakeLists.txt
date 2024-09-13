@@ -13,6 +13,9 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+find_package(autoware_vehicle_info_utils REQUIRED)
+include_directories(${autoware_vehicle_info_utils_INCLUDE_DIRS})
+message(SergioTest="${autoware_vehicle_info_utils_INCLUDE_DIRS}")
 # sender
 ament_auto_add_library(jw_interface_awiv_adapt_sender SHARED
   node/jw_interface_awiv_adapt_sender/jw_interface_awiv_adapt_sender.cpp
